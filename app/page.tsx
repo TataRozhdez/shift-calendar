@@ -36,9 +36,7 @@ export default function Home() {
   }, []);
 
   const activeSchedule = useMemo(() => {
-    return (
-      schedules.find((schedule) => schedule.id === activeScheduleId) ?? null
-    );
+    return schedules.find((schedule) => schedule.id === activeScheduleId);
   }, [schedules, activeScheduleId]);
 
   const handleCreateSchedule = (newSchedule: Schedule) => {
@@ -96,9 +94,10 @@ export default function Home() {
     ? new Date(activeSchedule.startDate)
     : null;
 
-  const todayShift = scheduleStartDate
-    ? getShiftByDate(new Date(), scheduleStartDate)
-    : null;
+  const todayShift =
+    scheduleStartDate && activeSchedule
+      ? getShiftByDate(new Date(), scheduleStartDate, activeSchedule.pattern)
+      : null;
 
   const shouldShowForm = isCreating || !activeSchedule;
 
@@ -191,7 +190,10 @@ export default function Home() {
             )}
 
             {scheduleStartDate && (
-              <ShiftCalendar startDate={scheduleStartDate} />
+              <ShiftCalendar
+                startDate={scheduleStartDate}
+                pattern={activeSchedule.pattern}
+              />
             )}
           </>
         )}

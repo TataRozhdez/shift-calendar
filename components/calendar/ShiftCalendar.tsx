@@ -9,15 +9,20 @@ import {
   isToday,
   startOfMonth,
   subMonths,
+  getDay,
 } from 'date-fns';
 
-import { getShiftByDate } from '@/lib/schedule';
+import { getShiftByDate, type ShiftType } from '@/lib/schedule';
 
 type ShiftCalendarProps = {
   startDate: Date;
+  pattern: ShiftType[];
 };
 
-export default function ShiftCalendar({ startDate }: ShiftCalendarProps) {
+export default function ShiftCalendar({
+  startDate,
+  pattern,
+}: ShiftCalendarProps) {
   const [visibleDate, setVisibleDate] = useState(new Date());
 
   const monthStart = startOfMonth(visibleDate);
@@ -27,6 +32,10 @@ export default function ShiftCalendar({ startDate }: ShiftCalendarProps) {
     start: monthStart,
     end: monthEnd,
   });
+
+  const firstDayOfWeek = getDay(monthStart); // 0-6
+  const emptyCellsCount = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1;
+  const emptyCells = Array.from({ length: emptyCellsCount });
 
   const handlePreviousMonth = () => {
     setVisibleDate((currentDate) => subMonths(currentDate, 1));
@@ -74,14 +83,18 @@ export default function ShiftCalendar({ startDate }: ShiftCalendarProps) {
       </div>
 
       <div className="grid grid-cols-7 gap-2 text-center text-sm">
-        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day) => (
-          <div key={day} className="pb-2 text-zinc-500">
+        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => (
+          <div key={day + idx} className="pb-2 text-zinc-500">
             {day}
           </div>
         ))}
 
+        {emptyCells.map((_, idx) => (
+          <div key={`empty-${idx}`} />
+        ))}
+
         {days.map((date) => {
-          const shift = getShiftByDate(date, startDate);
+          const shift = getShiftByDate(date, startDate, pattern);
 
           return (
             <div
